@@ -1,0 +1,173 @@
+% !TeX spellcheck = russian-aot
+% !TeX encoding = UTF-8
+% ----------------------------------------------------------------
+% plc-sample-2017.tex
+% Demonstration of PLC (Programming Languages and Compilers)
+%   conference proceedings and articles template file
+% http://plc.sfedu.ru/for-authors.html
+% Main file
+% Created: 20 January, 2017
+% ----------------------------------------------------------------
+%
+% Requirements:
+% - UTF-8 encoding;
+% - Standard article document class;
+% - A4 paper size;
+% - 10pt font;
+% - Single column;
+% - Floating environments for figures (e. g.
+%   \begin {figure} ... \end {figure});
+% - Authors' emails (optionally) and affiliations in \author command;
+% - An abstract and keywords are required;
+% - If a BibTeX file is used, it must be in the form: <prefix>-biblio.bib
+%   where <prefix> consists of the author's name and an abbreviated
+%   organization name;
+% - All used labels must be started with the same <prefix>;
+% - Volume: - for proceedings: up to 2 pages; for articles: up to 8 pages.
+%
+
+\documentclass [a4paper] {article}
+
+% ----------------------------------------------------------------
+% Required packages
+
+\usepackage [utf8] {inputenc}
+\usepackage [T2A] {fontenc}
+\usepackage [russian] {babel}
+
+\usepackage {url}
+\usepackage [style = gost-numeric] {biblatex}
+
+% ----------------------------------------------------------------
+% Title settings
+
+\addbibresource {lukyanov-sfedu-biblio.bib}
+
+% ----------------------------------------------------------------
+% Title settings
+
+\title %
+  {Синтаксической анализ с контролируемыми побочными эффектами}
+
+\author %
+{%
+  Лукьянов~Г.\,А.\textsuperscript {1}, \url {glukyanov@sfedu.ru} \and %
+  Пеленицын~А.\,М.\textsuperscript {1}, \url {apel@sfedu.ru} \\
+  \textsuperscript {1}Южный Федеральный Университет
+}%
+
+\date {}    % if desired
+
+% ----------------------------------------------------------------
+\begin {document}
+% ----------------------------------------------------------------
+
+\maketitle
+
+\begin {abstract}
+  %
+  Целью работы является развитие гибких и выразительных методов построения функциональных синтаксических анализаторов на основе современных подходов к контролю вычислительных эффектов. В работе рассматривается язык 
+  программирования Frank~\cite{Frank} и его применение к построению методов
+  синтаксического анализа.  
+  %
+  \\ \textbf {Ключевые слова:} синтаксический анализ, парсер, монадические комбинаторы парсеров, функциональное программирование, вычислительные эффекты.
+\end {abstract}
+
+\section{Вычислительные эффекты}
+
+Возможность статического контроля побочных эффектов является одним из
+принципиальных преимуществ статически типизированных языков
+программирования с богатыми системами типов. Отделение ``чистых''
+(англ. \emph{pure}) функций от вычислений, обременённых
+взаимодействием с устройствами ввода-вывода и другими побочными
+эффектами, позволяет с большей уверенностью рассуждать о надёжности
+разрабатываемой программы.
+
+\section{Синтаксические анализаторы}
+
+Синтаксический анализ может быть рассмотрен как вычисление с состоянием:
+на старте парсеру подаётся некоторая входная последовательность символов --- 
+начальное состояние. Каждый комбинатор каким-то образом модифицирует
+состояние. Разбор завершается, когда входной поток символов полностью
+исчерпывается. В случае обнаружения синтаксической ошибки или
+неоднозначности, анализатор завершает работу и сообщает о проблеме.
+Вышеописанные вычислительные эффекты могут быть выражены следующими
+конструкциями языка~\texttt{Frank}.    
+
+\begin{verbatim}
+parse : {[Exception ParseError, State (List Char)] X
+        } -> (List Char) -> Either ParseError X
+parse p str = catch (state str p!)
+\end{verbatim}
+
+Простейшим парсером, на основе которого строятся все комбинаторы, является
+парсер, разбирающий единственный символ входного потока. 
+
+\begin{verbatim}
+item : [Exception ParseError, State (List Char)]Char
+item! = on get! { nil       -> throw inputExhausted
+                | (x :: xs) -> put xs; x} 
+\end{verbatim}
+
+Парсер получает текущее состояние входного потока и, если он пуст, прерывает
+работу с соответствующей ошибкой. Иначе --- обновляет состояние и возвращает
+отщеплённый символ.
+
+На основе парсера~\texttt{item} строится парсер, распознающий символ, который
+соответствует заданному предикату.
+
+\begin{verbatim}
+sat : {Char -> [Exception ParseError, State (List Char)]Bool} -> 
+      [Exception ParseError, State (List Char)]Char
+sat p = on item! {c -> if (p c) {c} {throw parseError}}
+\end{verbatim}
+
+Другим важным комбинатором является альтернативное применение двух парсеров:
+производится попытка применить первый парсер и, в случае неудачи --- второй.
+Если же оба парсера не применимы --- процесс разбора завершается с ошибкой.
+
+\begin{verbatim}
+por : {[Exception ParseError, State (List Char)] X} -> 
+      {[Exception ParseError, State (List Char)] X} -> 
+      [Exception ParseError, State (List Char)] X
+por p1 p2 = 
+  on (parse p1 get!) { (right _)  -> p1! 
+                     | (left  _)  ->  on (parse p2 get!) 
+                       { (right _)   -> p2!
+                       | (left err)  -> throw err
+                       }}
+
+\end{verbatim}
+
+Для многократного повторения применения некоторого парсера необходимы
+комбинаторы~\texttt{some} и~\texttt{many}. Первый применяет парсер-параметр
+ноль или более раз, а второй --- хотя бы единожды. Типовые аннотации этих
+парсеров идентичны.
+
+\begin{verbatim}
+some : {[Exception ParseError, State (List Char)]X} ->
+       [Exception ParseError, State (List Char)](List X)
+some p = p! :: many p
+
+many p = por {some p} {nil}
+\end{verbatim}
+
+В качестве примера парсера верхнего уровня рассмотрим парсер для числовых
+литералов, использующем в своей реализации все описанные выше комбинаторы.
+
+\begin{verbatim}
+number : [Exception ParseError, State (List Char)] (List Char)
+number! = some {sat isDigit}
+\end{verbatim}
+
+\section{Выводы}
+
+\printbibliography
+
+% ----------------------------------------------------------------
+\end {document}
+% ----------------------------------------------------------------
+
+\endinput
+
+% End of File

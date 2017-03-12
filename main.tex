@@ -36,12 +36,12 @@
 \usepackage [english,russian] {babel}
 
 \usepackage {url}
-\usepackage [style = gost-numeric] {biblatex}
+% \usepackage [style = gost-numeric] {biblatex}
 
 % ----------------------------------------------------------------
 % Title settings
 
-\addbibresource {lukyanov-sfedu-biblio.bib}
+% \addbibresource {lukyanov-sfedu-biblio.bib}
 
 % ----------------------------------------------------------------
 % Title settings
@@ -297,7 +297,8 @@
 зрелости от реализации языка: наличия системы модулей, улучшения сообщений об
 ошибках компиляции и более развитой инфраструктуры, наконец, замены интерпретатора компилятором.
 
-\printbibliography
+\bibliographystyle{plain}
+\bibliography{lukyanov-sfedu-biblio}{}
 
 % ----------------------------------------------------------------
 \end {document}

@@ -1,0 +1,187 @@
+\documentclass[ucs,hyperref={pdftex,unicode},xcolor=dvipsnames,10pt]{beamer}%,ignorenonframetext
+\usepackage[utf8x]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[T2A]{fontenc}
+%\usepackage{tikz}
+%\usetikzlibrary{shapes,arrows,positioning,chains,calc}
+\usepackage{graphicx}
+\usepackage{fixltx2e}
+\usepackage{paratype}
+\usepackage{booktabs}
+\usepackage{pbox}
+\usepackage{ifthen}
+\usepackage{stmaryrd}
+
+\DeclareMathOperator{\fpconf}{\mathit{f\! \rho \varsigma o \eta f}}
+
+\newcommand{\img}[1]{
+\begin{center}
+\includegraphics[width=12cm,keepaspectratio]{./img/#1}
+\end{center}
+}
+
+\newcommand{\imgw}[2]{
+\begin{center}
+\includegraphics[width=#1,keepaspectratio]{./img/#2}
+\end{center}
+}
+
+\usetheme{CambridgeUS}
+\setbeamertemplate{navigation symbols}{}
+
+%%%%%%%%%%%%%%%   Своя цветовая гамма   %%%%%%%%%%%%%%%
+\definecolor{sfedu-blue}{HTML}{0033A0}
+\definecolor{sfedu-grey}{HTML}{768692}
+\definecolor{sfedu-orange}{HTML}{E03C31}
+
+\newcommand{\mycolor}{sfedu-blue}
+
+\setbeamercolor{palette tertiary}{bg=\mycolor}
+\setbeamercolor{frametitle}{fg=sfedu-orange}
+\setbeamercolor{title}{fg=sfedu-orange}
+\setbeamercolor{navigation symbols}{fg=\mycolor}
+\setbeamercolor{page number in head/foot}{fg=white, bg=sfedu-grey}
+\setbeamercolor{date in head/foot}{fg=white, bg=sfedu-grey}
+\setbeamercolor{title in head/foot}{fg=\mycolor}
+\setbeamercolor{section number projected}{bg=\mycolor}
+
+\setbeamercolor{block title}{fg=white, bg=sfedu-grey}
+
+\setbeamerfont{headline}{series=\bfseries\fontsize{7pt}{1em}\selectfont}
+\setbeamerfont{footline}{series=\fontsize{7pt}{1em}\selectfont}
+\setbeamerfont{title}{series=\usefont{T2A}{PTSansCaption-TLF}{m}{n}}
+\setbeamerfont{frametitle}{series=\usefont{T2A}{PTSansCaption-TLF}{m}{n}}
+\setbeamerfont{page number in head/foot}{series=\bfseries}
+
+% списки
+\setbeamertemplate{enumerate items}[square]
+\setbeamercolor{item projected}{bg=\mycolor,fg=white}
+
+\makeatletter
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor\expandafter\beamer@ifempty\expandafter{\beamer@shortinstitute}{}{~~(\insertshortinstitute)}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.40\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.30\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+    \usebeamerfont{page number in head/foot}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\makeatother
+
+%\setbeamercolor{palette primary}{fg=black, bg=sfedu-grey}
+%\setbeamercolor{palette secondary}{fg=black, bg=sfedu-orange}
+%\setbeamercolor{palette quaternary}{fg=black, bg=black}
+
+% Логотип ЮФУ
+\logo{\vspace{-.2cm}\includegraphics[height=1.2cm]{img/sfedu.png}}
+
+% В заголовке только название раздела с номером
+% (удобно, когда нет подразделов)
+\setbeamertemplate{headline}
+{%
+\begin{beamercolorbox}[ht=2.5ex,dp=1ex,center]{section in head/foot}
+\usebeamerfont{page number in head/foot}\footnotesize
+\ifthenelse{\value{section} > 0}{\insertsectionnumber. }{}%
+\insertsectionhead
+\end{beamercolorbox}%
+}
+
+\AtBeginSection[]
+{
+\begin{frame}<beamer>
+\frametitle{План}
+\tableofcontents[currentsection,hideothersubsections]
+\end{frame}
+}
+
+\newcommand{\link}[2]{\textcolor{sfedu-blue}{\href{#1}{#2}}}
+
+\newcommand{\Wrapped}[2][l]{%
+  \begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+\newcommand{\Set}{\ensuremath{\mathbf{Set}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\m}[1]{\texttt{#1}}
+%\newcommand{\ts}{\textsuperscript}
+%\usepackage{nth}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%     Content slide    %%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{calc}
+
+\newcommand{\lecturer}[8]{%
+\begin{frame}[t]{Лектор}
+
+\begin{block}{#1}
+\begin{minipage}{#2}
+\imgw{#2}{#3}
+\end{minipage}
+%
+\begin{minipage}{11cm - #2}
+\begin{itemize}
+  \item
+\emph{Место работы:} #4
+
+  \item
+\emph{Тема диссертации:} #5
+\end{itemize}
+\end{minipage}
+\end{block}
+
+\onslide<1>{
+\emph{Основные публикации}
+\begin{itemize}\small
+\itemsep1pt\parskip0pt\parsep0pt
+
+#6
+
+\end{itemize}
+}
+\onslide<2>{
+\vspace{#7}
+
+\emph{Недавние публикации}
+
+\begin{itemize}\small
+\itemsep1pt\parskip0pt\parsep0pt
+
+#8
+
+\end{itemize}
+}
+
+\end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%     Content slide    %%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\content}[7][]{%
+
+\begin{frame}{Содержание}
+
+\begin{block}{Лекция 1. #2}
+#3
+\end{block}
+
+\begin{block}{Лекция 2.  #4}
+#5
+\end{block}
+
+\begin{block}{Лекция 3. #6}
+#7
+\end{block}
+
+#1
+
+\end{frame}
+}

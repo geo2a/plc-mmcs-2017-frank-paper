@@ -1,0 +1,77 @@
+\begin{frame}[fragile]{Парсер как комбинация эффектов}
+
+\begin{block}{Обработка комбинации эффектов}
+\begin{minted}{haskell}
+parse : {[Exception ParseError
+         , State (List Char)] X
+        } -> (List Char) -> Either ParseError X
+parse p str = catch (state str p!)
+\end{minted}
+\end{block}
+
+\begin{block}{Простые парсеры}
+\begin{minted}{haskell}
+item:[Exception ParseError, State (List Char)]Char
+item! = on get! { nil       -> throw inputExhausted
+                | (x :: xs) -> put xs; x}
+
+sat:{Char ->[Exception ParseError, State (List Char)]Bool}
+    -> [Exception ParseError, State (List Char)]Char
+sat p = on item! {c -> if (p c) {c} {throw parseError}}
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Парсер как комбинация эффектов}
+\begin{block}{Простые парсеры}
+\begin{minted}{haskell}
+char : Char -> [ Exception ParseError
+               , State (List Char)
+               ] Char
+char c = sat {x -> eqChar x c}
+\end{minted}
+\end{block}
+
+\begin{block}{Простые парсеры}
+\begin{minted}{haskell}
+string : (List Char) -> [ Exception ParseError
+                        , State (List Char)
+                        ] (List Char)
+string str = map char str
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Парсер как комбинация эффектов}
+\begin{block}{Комбианаторы детерминированного выбора}
+\begin{minted}{haskell}
+choose : {[Exception ParseError, State (List Char)] X} ->
+      {[Exception ParseError, State (List Char)] X} ->
+      [Exception ParseError, State (List Char)] X
+choose p1 p2 =
+  on (parse p1 get!) { (right _)  -> p1!
+                     | (left  _)  ->  on (parse p2 get!)
+                       { (right _)   -> p2!
+                       | (left err)  -> throw err
+                       }
+                     }
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Парсер как комбинация эффектов}
+\begin{block}{Комбинаторы }
+\begin{minted}{haskell}
+many : {[Exception ParseError, State (List Char)]X} ->
+       [Exception ParseError, State (List Char)](List X)
+many p = choose {some p} {nil}
+
+some : {[Exception ParseError, State (List Char)] X} ->
+       [Exception ParseError, State (List Char)](List X)
+some p = p! :: many p
+\end{minted}
+\end{block}
+\end{frame}
+
+
+

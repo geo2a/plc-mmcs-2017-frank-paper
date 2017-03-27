@@ -1,0 +1,146 @@
+\begin{frame}{Язык программирования Frank}
+  Последняя версия представлена на POPL'17 в статье Do be do be do от Sam Lindley, Conor McBride, Craig McLaughlin
+  \begin{block}{Особенности}
+    \begin{itemize}
+      \item \textbf{Строгая} стратегия вычислений
+      \item Алгебраические типы данных
+      \item Разделение \emph{типов-значений} и \emph{типов-вычислений}
+      \item \emph{Интерфейсы} --- сигнатуры эффектов
+      \item \emph{Операции} --- обработчики эффектов
+      \item Обычные функции являются тривиальными операторами, обрабатывающими пустой множество эффектов
+      \item Полиморфизм эффектов основанный на \emph{охватывающего поля эффектов}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Типы данных и функции}
+\begin{block}{Натуральные числа}
+\begin{minted}{haskell}
+data Nat = zero | suc Nat
+\end{minted}
+\end{block}
+\pause
+\begin{block}{Рекурсивные функции}
+\begin{minted}{haskell}
+eqNat : Nat -> Nat -> Bool
+eqNat zero zero  = true
+eqNat (suc x) (suc y) = eqNat x y
+eqNat zero _     = false
+eqNat _  zero    = false
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Полиморфные по эффектам функции}
+\begin{block}{Функция \texttt{map}}
+\begin{minted}{haskell}
+map : {X -> Y} -> List X -> List Y
+map f nil         = nil
+map f (cons x xs) = cons (f x) (map f xs)
+\end{minted}
+\end{block}
+\pause
+\begin{block}{Применение \texttt{map} в отсутствие эффектов}
+\begin{minted}{haskell}
+pureMap : {List Int}
+pureMap = map {x -> x + 1} [1,2,3]
+\end{minted}
+\end{block}
+\end{frame}
+
+
+\begin{frame}[fragile]{Полиморфные по эффектам функции}
+\begin{block}{Эффект консольного ввода-вывода}
+\begin{minted}{haskell}
+interface Console = inch : Char
+                  | ouch : Char -> Unit
+\end{minted}
+\end{block}
+\pause
+\begin{block}{\texttt{map} в поле эффекта \texttt{Console}}
+\begin{minted}{haskell}
+effectfulMap : {[Console]List Unit}
+effectfulMap = map ouch "Hello World!"
+\end{minted}
+\end{block}
+\pause
+\begin{block}{Тип \texttt{map} без синтаксического сахара}
+\begin{minted}{haskell}
+map : {{X -> []Y} -> List X -> []List Y}
+\end{minted}
+\end{block}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Управление потоком выполнения}
+\begin{block}{Энергичный условный оператор}
+\begin{minted}{haskell}
+iffy : Bool -> X -> X -> X
+iffy tt t f = t
+iffy ff t f = f
+\end{minted}
+\end{block}
+\pause
+\begin{block}{``Традиционный'' условный оператор}
+\begin{minted}{haskell}
+if : Bool -> {X} -> {X} -> X
+if tt t f = t!
+if ff t f = f!
+\end{minted}
+\end{block}
+\pause
+\begin{block}{Аналог оператора монадического связывания \texttt{>>=}}
+\begin{minted}{haskell}
+on : X -> {X -> Y} -> Y
+on x f = f x
+\end{minted}
+\end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]{Эффект изменяемого состояния}
+\begin{block}{Интерфейс эффекта \texttt{State}}
+\begin{minted}{haskell}
+interface State S = get : S
+                  | put : S -> Unit
+\end{minted}
+\end{block}
+\pause
+\begin{block}{Обработчик эффекта \texttt{State}}
+\begin{minted}{haskell}
+state : S -> <State S>X -> X
+state _ x          = x
+state s <get -> k>  = state s (k s)
+state _ <put s -> k>  = state s (k unit)
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Исключения}
+\begin{block}{Интерфейс эффекта \texttt{Exception}}
+\begin{minted}{haskell}
+interface Exception E
+  = exception : E -> Zero
+\end{minted}
+\end{block}
+\pause
+\begin{block}{Возбуждение исключения}
+\begin{minted}{haskell}
+throw : E -> [Exception E]X
+throw e = on (exception e) {}
+\end{minted}
+\end{block}
+\pause
+\begin{block}{Обработка исключения}
+\begin{minted}{haskell}
+catch : <Exception E>X -> Either E X
+catch x = right x
+catch <exception e -> _> = left e
+\end{minted}
+\end{block}
+
+\end{frame}
+
+
+

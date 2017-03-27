@@ -1,0 +1,109 @@
+\input{preamble.tex}
+
+\usepackage[cache=false]{minted}
+
+\makeatletter
+\expandafter\def\csname PYGdefault@tok@err\endcsname{\def\PYGdefault@bc##1{{\strut ##1}}}
+\makeatother
+
+\title[Построение синтаксических анализаторов на основе алгебраических эффектов]{Построение синтаксических анализаторов на основе алгебраических эффектов}
+
+\subtitle{}
+
+\author[Георгий Лукьянов]{%
+Георгий Лукьянов\texorpdfstring{\\}{ }
+georgiy.lukjanov@gmail.com}
+
+\author[]{%
+Георгий Лукьянов\texorpdfstring{\\}{ }
+\textit{georgiy.lukjanov@gmail.com}\texorpdfstring{\\}{ }
+Артём Пеленицын \texorpdfstring{\\}{ }
+\textit{apel@sfedu.ru}
+}
+
+\date{42 March 2017}%
+
+\institute[MMCS SFEDU]{%
+Southern Federal University \texorpdfstring{\\}{ }
+I. I. Vorovich Institute of Mathematics, Mechanics and Computer Science\texorpdfstring{\\}{ }
+}
+
+% рисунок на титуле
+\titlegraphic{%
+% \vspace{-1.3cm}\imgw{4cm}{stannes.jpg} \hfill %
+%\vspace{-1.3cm}\imgw{3.6cm}{sheldonian.jpg}%
+}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%  Intro  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{frame}{Outline}
+% \tableofcontents
+% \end{frame}
+
+\section{Управление побочными эффектами}
+
+% \begin{frame}
+% \imgw{4cm}{xkcd.png} \hfill
+% \end{frame}
+
+\begin{frame}{Подходы к управлению побочными эффектами (не является классификацией)}
+\begin{itemize}
+  \item Функторы
+  \item Аппликативные функторы
+  \item Монады (И трансформеры монад)
+  \item Стрелки
+  \item Алгебраические эффекты и обработчики эффектов
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%  Frank  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Язык программирования Frank}
+
+\input{tex/frank.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%  Building Parsers Combinators with Frank  %%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Построение парсеров на Frank}
+
+\begin{frame}{Способы представления эффекта парсера}
+  \begin{itemize}
+    \item Комбинация стандартных эффектов
+    \item Обособленный специализированный эффект
+  \end{itemize}
+\end{frame}
+
+\input{tex/parsers-effects-combination.tex}
+
+\input{tex/parsers-standalone-effect.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%  References  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{References}
+
+\begin{itemize}
+  \item Do be do be do. Sam Lindley, Conor McBride, and Craig McLaughlin. POPL 2017.
+  \item A. Bauer and M. Pretnar. Programming with algebraic effects and handlers. J. Log. Algebr. Meth. Program., 84(1):108–123, 2015. URL http://dx.doi.org/10.1016/j.jlamp.2014.02.001.
+  \item P. B. Levy. Call-By-Push-Value: A Functional/Imperative Synthesis, volume 2 of Semantics Structures in Computation. Springer, 2004.
+  \item Monadic Parser Combinators // \textit{Graham Hutton}, \textit{Erik Meijer} – Department of Computer Science, University of Nottingham, 1996
+  \item This slides \url{https://github.com/geo2a/ewscs17-frank-parsers-talk}
+  \item Frankoparsec --- experimental parser combinators library implemented in Frank \url{https://github.com/geo2a/frankoparsec}
+\end{itemize}
+
+\end{frame}
+
+\end{document}

@@ -1,0 +1,104 @@
+\begin{frame}{Парсер как обособленный эффект}
+  \begin{itemize}
+    \item Парсер для одиночных символов
+    \item Парсер для последовательностей
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Парсер для одиночных символов}
+\begin{block}{Интерфейс эффекта}
+\begin{minted}{haskell}
+interface Parser = fail : ParseError -> Char
+                 | sat : {Char -> Bool} -> Char
+                 | choose : {[Parser] Char} ->
+                            {[Parser] Char} -> Char
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Парсер для одиночных символов}
+
+\begin{block}{Обработчик эффекта}
+\begin{minted}{haskell}
+runParser : (List Char) -> <Parser>Char ->
+            Either ParseError (Pair Char (List Char))
+runParser xs r = right (pair r xs)
+runParser _ <fail err -> _> = left err
+runParser nil <sat p -> k> = left err
+runParser (x::xs) <sat p -> k> =
+  if (p x) {runParser xs (k x)} {runParser nil (fail err)}
+runParser xs <choose p1 p2 -> k> =
+  on (runParser xs p1!)
+    { (right _) -> runParser xs p1!
+    | (left err) -> on (runParser xs p2!)
+      { (right _) -> runParser xs p2!
+      | (left err) -> left err
+      }
+    }
+\end{minted}
+\end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]{Парсер для последовательностей}
+\begin{block}{Интерфейс эффекта}
+\begin{minted}{haskell}
+interface MultiParser
+  = singleton : {[Parser] Char} -> List Char
+  | many : {[Parser] Char} -> List Char
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Парсер для последовательностей}
+\begin{block}{Обработчик эффекта}
+\begin{minted}{haskell}
+runMultiParser : (List Char) -> <MultiParser>(List Char)
+                 -> List Char
+runMultiParser _ r = r
+runMultiParser xs <singleton p -> k> =
+  on (runParser xs p!)
+    { (right (pair ok rest)) ->
+        ok :: (runMultiParser rest (k nil))
+    | (left  _) -> nil
+    }
+runMultiParser xs <many p -> k> =
+  on (runParser xs p!)
+    { (right (pair ok rest)) ->
+        ok :: (runMultiParser rest (many p; k nil))
+    | (left err) -> runMultiParser xs (k nil)
+    }
+\end{minted}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Построение парсеров}
+\begin{block}{}
+\begin{minted}{haskell}
+char : Char -> [Parser]Char
+char c = sat {x -> eqChar x c}
+\end{minted}
+\end{block}
+\pause
+\begin{block}{}
+\begin{minted}{haskell}
+letter : [Parser]Char
+letter! = sat isLetter
+\end{minted}
+\end{block}
+\pause
+\begin{block}{}
+\begin{minted}{haskell}
+word : [MultiParser](List Char)
+word! = many letter
+\end{minted}
+\end{block}
+\pause
+\begin{block}{}
+\begin{minted}{haskell}
+main : {List Char}
+main! = runMultiParser "Hello world"
+          (word!; singleton space; word!)
+\end{minted}
+\end{block}
+\end{frame}
